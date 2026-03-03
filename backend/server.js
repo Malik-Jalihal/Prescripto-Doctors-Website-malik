@@ -16,9 +16,12 @@ connectCloudinary()
 // middlewares
 app.use(express.json())
 
+// create a server
+
+const server = express();
+
 // configure CORS - allow all origins in development/deployment
-app.use(cors());
-// If you need more restrictive configuration, uncomment and adjust:
+// server.use(cors());
 // app.use(cors({
 //   origin: true, // Allow all origins
 //   methods: ['GET','POST','PUT','DELETE','PATCH','OPTIONS'],
@@ -27,7 +30,19 @@ app.use(cors());
 // }));
 
 // explicitly handle pre‑flight for all routes
-app.options('*', cors());
+// app.options('*', cors());
+ server.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', '*');
+  res.header('Access-Control-Allow-Headers', '*');
+  // return ok preflight request.
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+}
+  )
+
 
 // api endpoints
 app.use("/api/user", userRouter)
