@@ -16,7 +16,7 @@ connectCloudinary()
 // middlewares
 app.use(express.json())
 
-const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()) : ["http://localhost:5173", "https://prescripto-doctors-website-malik.onrender.com","https://localhost:5174"]
+const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()) : ["http://localhost:5173", "https://prescripto-doctors-website-malik.onrender.com","http://localhost:5174"]
 
 app.use(cors({
   origin: allowedOrigins,
