@@ -1,66 +1,62 @@
-import express from "express"
-import cors from 'cors'
-import 'dotenv/config'
-import connectDB from "./config/mongodb.js"
-import connectCloudinary from "./config/cloudinary.js"
-import userRouter from "./routes/userRoute.js"
-import doctorRouter from "./routes/doctorRoute.js"
-import adminRouter from "./routes/adminRoute.js"
+import express from "express";
+import cors from "cors";
+import "dotenv/config";
+import connectDB from "./config/mongodb.js";
+import connectCloudinary from "./config/cloudinary.js";
+import userRouter from "./routes/userRoute.js";
+import doctorRouter from "./routes/doctorRoute.js";
+import adminRouter from "./routes/adminRoute.js";
 
 // app config
-const app = express()
-const port = process.env.PORT || 4000
-connectDB()
-connectCloudinary()
+const app = express();
+const port = process.env.PORT || 4000;
+
+// connect services
+connectDB();
+connectCloudinary();
 
 // middlewares
-app.use(express.json())
+app.use(express.json());
 
-const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()) : ["http://localhost:5173", "https://prescripto-doctors-website-malik.onrender.com","http://localhost:5174"]
+// allowed origins
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "https://prescripto-doctors-website-malik-gl.vercel.app",
+  "https://prescripto-doctors-website-malik.onrender.com",
+  "https://prescripto-doctors-website-malik.vercel.app"
+];
 
-app.use(cors({
-  origin: allowedOrigins,
-  credentials: true
-}));
+// CORS configuration
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization", "token", "atoken"]
+  })
+);
 
-// create a server
+// handle preflight requests
+app.options("*", cors());
 
-const server = express();
+// API routes
+app.use("/api/user", userRouter);
+app.use("/api/admin", adminRouter);
+app.use("/api/doctor", doctorRouter);
 
-// configure CORS - allow all origins in development/deployment
-// server.use(cors());
-// app.use(cors({
-//   origin: true, // Allow all origins
-//   methods: ['GET','POST','PUT','DELETE','PATCH','OPTIONS'],
-//   allowedHeaders: ['Content-Type','Authorization','atoken','token'],
-//   credentials: true,
-// }));
-
-// explicitly handle pre‑flight for all routes
-// app.options('*', cors());
- server.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', '*');
-  res.header('Access-Control-Allow-Headers', '*');
-  // return ok preflight request.
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  next();
-}
-  )
-
-  
-  
-
-
-// api endpoints
-app.use("/api/user", userRouter)
-app.use("/api/admin", adminRouter)
-app.use("/api/doctor", doctorRouter)
-
+// test route
 app.get("/", (req, res) => {
-  res.send("API Working")
+  res.send("API Working");
 });
 
-app.listen(port, () => console.log(`Server started on PORT:${port}`))
+// start server
+app.listen(port, () => {
+  console.log(`Server started on PORT: ${port}`);
+});
